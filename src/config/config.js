@@ -1,4 +1,2 @@
-const API_URL = "http://10.0.2.2:5000/api/auth/login"; // Jika pakai emulator Android Studio
- // Sesuaikan dengan backend kamu
-
+const API_URL = "http://192.168.1.5:3000";
 export default API_URL;

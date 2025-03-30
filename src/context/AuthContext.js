@@ -3,36 +3,38 @@ import { Alert } from "react-native";
 
 const AuthContext = createContext();
 
-const API_URL = "http://10.0.2.2:5000/api/auth/login"; // Pastikan ini benar
-
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
 
     const handleLogin = async (email, password) => {
         try {
-            console.log("🔄 Mengirim request ke:", API_URL);
-            const response = await fetch(API_URL, {
+            const response = await fetch("http://10.0.2.2:5000/api/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password }),
             });
 
             const data = await response.json();
-            console.log("✅ Success:", data);
 
             if (response.ok) {
-                setUser(data);
+                setUser(data.user);
+                return true;
             } else {
-                Alert.alert("Login Gagal", data.msg || "Terjadi kesalahan");
+                Alert.alert("Login Gagal", data.msg || "Email atau password salah.");
+                return false;
             }
         } catch (error) {
-            console.error("❌ Fetch Error:", error);
-            Alert.alert("Error", "Gagal menghubungi server");
+            Alert.alert("Error", "Gagal menghubungi server.");
+            return false;
         }
     };
 
+    const logout = () => {
+        setUser(null);
+    };
+
     return (
-        <AuthContext.Provider value={{ user, handleLogin }}>
+        <AuthContext.Provider value={{ user, handleLogin, logout }}>
             {children}
         </AuthContext.Provider>
     );

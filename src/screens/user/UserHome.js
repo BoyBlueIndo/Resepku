@@ -1,21 +1,25 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import Header from "../../components/Header";
+import React, { useContext } from "react";
+import { View, Text, Button, StyleSheet } from "react-native";
+import { AuthContext } from "../../context/AuthContext";
 
-const UserHome = () => {
+
+const UserHome = ({ navigation }) => {
+    const { user, logout } = useContext(AuthContext);
+
+    useEffect(() => {
+        console.log("👤 Data User:", user);
+        if (!user) {
+            navigation.replace("Login");
+        }
+    }, [user]);
+
     return (
         <View style={styles.container}>
-            <Header title="User Home" />
-            <Text>Selamat datang di Home User</Text>
+            <Text style={styles.text}>Welcome, {user?.name || "User"}!</Text>
+            <Button title="Logout" onPress={logout} />
         </View>
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 20,
-    },
-});
 
 export default UserHome;
