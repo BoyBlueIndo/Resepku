@@ -12,40 +12,46 @@ const LoginScreen = ({ navigation }) => {
             Alert.alert("Error", "Email dan Password harus diisi!");
             return;
         }
-
+    
         try {
-            const success = await handleLogin(email, password);
-            if (success) {
+            const role = await handleLogin(email, password);
+
+            if (role === "admin") {
+                console.log("🔀 Navigasi ke AdminDashboard...");
+                navigation.replace("AdminDashboard");
+            } else if (role === "user") {
                 console.log("🔀 Navigasi ke UserHome...");
-                navigation.replace("UserHome"); // Gantilah sesuai nama screen yang ada
+                navigation.replace("UserHome");
             } else {
-                Alert.alert("Error", "Email atau password salah.");
+                Alert.alert("Error", "Role tidak dikenali.");
             }
+            
         } catch (error) {
             console.error("Error saat login:", error);
             Alert.alert("Error", "Terjadi kesalahan saat login.");
         }
     };
+    
 
     return (
         <ImageBackground source={require("../../assets/image.png")} style={styles.background}>
             <View style={styles.container}>
                 <Text style={styles.title}>LOGIN</Text>
-                <TextInput 
-                    style={styles.input} 
-                    placeholder="EMAIL" 
-                    placeholderTextColor="#333" 
-                    value={email} 
-                    onChangeText={setEmail} 
+                <TextInput
+                    style={styles.input}
+                    placeholder="EMAIL"
+                    placeholderTextColor="#333"
+                    value={email}
+                    onChangeText={setEmail}
                     autoCapitalize="none"
                 />
-                <TextInput 
-                    style={styles.input} 
-                    placeholder="PASSWORD" 
-                    placeholderTextColor="#333" 
-                    secureTextEntry 
-                    value={password} 
-                    onChangeText={setPassword} 
+                <TextInput
+                    style={styles.input}
+                    placeholder="PASSWORD"
+                    placeholderTextColor="#333"
+                    secureTextEntry
+                    value={password}
+                    onChangeText={setPassword}
                 />
                 <TouchableOpacity style={styles.button} onPress={onLogin}>
                     <Text style={styles.buttonText}>LOGIN</Text>
