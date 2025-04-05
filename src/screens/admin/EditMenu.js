@@ -8,7 +8,8 @@ import {
   Alert,
 } from "react-native";
 
-const API_URL = "http://192.168.1.5:3000/api/menu"; // Ganti sesuai backend kamu
+const API_URL = "http://192.168.1.9:3000/api/menu";
+ // Ganti sesuai backend kamu
 
 const EditMenu = ({ route, navigation }) => {
   const { menu } = route.params;

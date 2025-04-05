@@ -3,7 +3,8 @@ import { Alert } from "react-native";
 
 const AuthContext = createContext();
 
-const API_URL = "http://192.168.1.5:3000/api/auth";
+// ✅ Diperbaiki: API_URL tanpa /login
+const API_URL = "http://192.168.1.9:3000/api/auth";
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -11,32 +12,33 @@ export const AuthProvider = ({ children }) => {
     const handleLogin = async (email, password) => {
         try {
             console.log("🔄 Mengirim request ke:", `${API_URL}/login`);
+
             const response = await fetch(`${API_URL}/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password }),
             });
-    
+
             const data = await response.json();
             console.log("✅ Response dari server:", data);
-            console.log("👉 role dari respons:", data?.user?.role);
-    
+            console.log("👉 Role dari respons:", data?.user?.role);
+
             if (response.ok) {
                 const userRole = data?.user?.role;
-    
+
                 if (!userRole) {
                     Alert.alert("Error", "Role tidak ditemukan dalam response.");
                     return false;
                 }
-    
+
                 const userData = {
                     token: data.token,
                     role: userRole,
                     userId: data.user?._id,
                 };
-    
+
                 setUser(userData);
-    
+
                 return userRole === "admin" ? "admin" : "user";
             } else {
                 Alert.alert("Login Gagal", data.msg || "Email atau password salah.");
@@ -48,8 +50,7 @@ export const AuthProvider = ({ children }) => {
             return false;
         }
     };
-    
-    
+
     const logout = () => {
         setUser(null);
     };

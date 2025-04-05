@@ -9,14 +9,15 @@ import AdminDashboard from "../screens/admin/AdminDashboard";
 import ManageUsers from "../screens/admin/ManageUsers";
 import MenuList from "../screens/user/MenuList";
 import AddMenu from "../screens/admin/AddMenu";
-import EditMenu from "../screens/admin/EditMenu"; // ✅ Tambahkan ini
+import EditMenu from "../screens/admin/EditMenu";
+import MenuDetail from "../screens/user/MenuDetail";
 
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator initialRouteName="Login">
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="UserHome" component={UserHome} />
@@ -24,7 +25,8 @@ const AppNavigator = () => {
         <Stack.Screen name="ManageUsers" component={ManageUsers} />
         <Stack.Screen name="MenuList" component={MenuList} />
         <Stack.Screen name="AddMenu" component={AddMenu} options={{ title: "Tambah Menu" }} />
-        <Stack.Screen name="EditMenu" component={EditMenu} options={{ title: "Edit Menu" }} /> {/* ✅ */}
+        <Stack.Screen name="EditMenu" component={EditMenu} options={{ title: "Edit Menu" }} />
+        <Stack.Screen name="MenuDetail" component={MenuDetail} />
       </Stack.Navigator>
     </NavigationContainer>
   );

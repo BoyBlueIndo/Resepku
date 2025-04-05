@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useContext } from "react";
 import {
   View,
   Text,
@@ -8,11 +8,14 @@ import {
   Alert,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
+import { AuthContext } from "../../context/AuthContext"; // ✅ Tambahkan ini
 
-const API_URL = "http://192.168.1.5:3000/api/menu";
+const API_URL = "http://192.168.1.9:3000/api/menu";
+
 
 const AdminDashboard = ({ navigation }) => {
   const [menus, setMenus] = useState([]);
+  const { logout } = useContext(AuthContext); // ✅ Ambil logout dari context
 
   const fetchMenus = async () => {
     try {
@@ -37,7 +40,6 @@ const AdminDashboard = ({ navigation }) => {
     }
   };
 
-  // Gunakan useFocusEffect untuk refresh saat kembali ke halaman ini
   useFocusEffect(
     useCallback(() => {
       fetchMenus();
@@ -58,14 +60,10 @@ const AdminDashboard = ({ navigation }) => {
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() =>
-            Alert.alert(
-              "Konfirmasi",
-              "Yakin ingin menghapus menu ini?",
-              [
-                { text: "Batal", style: "cancel" },
-                { text: "Hapus", style: "destructive", onPress: () => deleteMenu(item._id) },
-              ]
-            )
+            Alert.alert("Konfirmasi", "Yakin ingin menghapus menu ini?", [
+              { text: "Batal", style: "cancel" },
+              { text: "Hapus", style: "destructive", onPress: () => deleteMenu(item._id) },
+            ])
           }
           style={styles.deleteBtn}
         >
@@ -75,15 +73,36 @@ const AdminDashboard = ({ navigation }) => {
     </View>
   );
 
+  const handleLogout = () => {
+    Alert.alert("Logout", "Yakin ingin keluar?", [
+      { text: "Batal", style: "cancel" },
+      {
+        text: "Keluar",
+        style: "destructive",
+        onPress: () => {
+          logout();
+          navigation.replace("Login"); // 🚪 Kembali ke login
+        },
+      },
+    ]);
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Admin Dashboard</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>Admin Dashboard</Text>
+        <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
+      </View>
+
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => navigation.navigate("AddMenu")}
       >
         <Text style={styles.addButtonText}>+ Tambah Menu</Text>
       </TouchableOpacity>
+
       <FlatList
         data={menus}
         keyExtractor={(item) => item._id}
@@ -96,7 +115,20 @@ const AdminDashboard = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: "#fff" },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 10 },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  title: { fontSize: 24, fontWeight: "bold" },
+  logoutBtn: {
+    backgroundColor: "#FF6347",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 5,
+  },
+  logoutText: { color: "#fff", fontWeight: "bold" },
   addButton: {
     backgroundColor: "#90ee90",
     padding: 12,
