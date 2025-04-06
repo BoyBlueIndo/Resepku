@@ -5,20 +5,51 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Image,
   Alert,
+  ScrollView,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 
-const API_URL = "http://192.168.1.9:3000/api/menu";
- // Ganti sesuai backend kamu
+const API_URL = "http://192.168.1.9:3000/api/menu"; // Ganti sesuai IP kamu
 
 const EditMenu = ({ route, navigation }) => {
   const { menu } = route.params;
+
   const [nama, setNama] = useState(menu.nama);
   const [harga, setHarga] = useState(String(menu.harga));
+  const [deskripsi, setDeskripsi] = useState(menu.deskripsi || "");
+  const [videoUrl, setVideoUrl] = useState(menu.videoUrl || "");
+  const [image, setImage] = useState(menu.image || "");
+
+  const pickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      Alert.alert("Izin ditolak", "Izin akses galeri diperlukan.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 1,
+      base64: true,
+    });
+
+    if (!result.canceled && result.assets.length > 0) {
+      const source = "data:image/jpeg;base64," + result.assets[0].base64;
+      setImage(source);
+    }
+  };
 
   const handleUpdate = async () => {
-    if (!nama || !harga) {
-      return Alert.alert("Peringatan", "Nama dan Harga harus diisi");
+    if (!nama || !harga || !deskripsi || !videoUrl || !image) {
+      return Alert.alert("Peringatan", "Semua field harus diisi");
+    }
+
+    const hargaNumber = parseInt(harga);
+    if (isNaN(hargaNumber) || hargaNumber <= 0) {
+      return Alert.alert("Peringatan", "Harga harus berupa angka positif");
     }
 
     try {
@@ -27,24 +58,32 @@ const EditMenu = ({ route, navigation }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ nama, harga }),
+        body: JSON.stringify({
+          nama,
+          harga: hargaNumber,
+          deskripsi,
+          videoUrl,
+          image,
+        }),
       });
 
       if (response.ok) {
         Alert.alert("Sukses", "Menu berhasil diperbarui");
         navigation.goBack();
       } else {
-        Alert.alert("Gagal", "Gagal memperbarui menu");
+        const errorData = await response.json();
+        Alert.alert("Gagal", errorData.msg || "Terjadi kesalahan saat memperbarui");
       }
     } catch (error) {
-      console.error("Gagal edit menu:", error);
-      Alert.alert("Error", "Terjadi kesalahan saat memperbarui");
+      console.error("❌ Gagal edit menu:", error);
+      Alert.alert("Error", "Terjadi kesalahan pada server");
     }
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Edit Menu</Text>
+
       <TextInput
         placeholder="Nama Menu"
         value={nama}
@@ -58,30 +97,80 @@ const EditMenu = ({ route, navigation }) => {
         keyboardType="numeric"
         style={styles.input}
       />
+      <TextInput
+        placeholder="Deskripsi"
+        value={deskripsi}
+        onChangeText={setDeskripsi}
+        multiline
+        numberOfLines={4}
+        style={[styles.input, { height: 100, textAlignVertical: "top" }]}
+      />
+      <TextInput
+        placeholder="URL Video (YouTube, dll)"
+        value={videoUrl}
+        onChangeText={setVideoUrl}
+        style={styles.input}
+      />
+
+      <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
+        {image ? (
+          <Image source={{ uri: image }} style={styles.imagePreview} />
+        ) : (
+          <Text style={{ color: "#888" }}>Pilih Gambar</Text>
+        )}
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.button} onPress={handleUpdate}>
         <Text style={styles.buttonText}>Simpan Perubahan</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
+  container: {
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
-    borderRadius: 5,
+    borderRadius: 8,
     padding: 10,
     marginBottom: 15,
+    fontSize: 16,
+  },
+  imagePicker: {
+    height: 200,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
+    overflow: "hidden",
+  },
+  imagePreview: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
   },
   button: {
-    backgroundColor: "#87ceeb",
-    padding: 12,
-    borderRadius: 5,
+    backgroundColor: "#28a745",
+    padding: 15,
+    borderRadius: 8,
     alignItems: "center",
   },
-  buttonText: { fontSize: 16, fontWeight: "bold", color: "#fff" },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
 });
 
 export default EditMenu;

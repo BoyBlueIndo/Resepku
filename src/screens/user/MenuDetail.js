@@ -1,73 +1,97 @@
 import React from "react";
-import { View, Text, StyleSheet, Image, Linking, TouchableOpacity } from "react-native";
+import { View, Text, Image, StyleSheet } from "react-native";
 import { WebView } from "react-native-webview";
+import { Video } from "expo-video";
+
+// Fungsi untuk mengubah URL YouTube jadi embed
+const convertYoutubeUrlToEmbed = (url) => {
+  if (!url) return "";
+  const match = url.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([\w-]{11})/
+  );
+  return match ? `https://www.youtube.com/embed/${match[1]}` : url;
+};
 
 const MenuDetail = ({ route }) => {
-  const { nama, deskripsi, image, videoUrl } = route.params;
-
-  const extractYoutubeId = (url) => {
-    const match = url.match(/(?:\?v=|\/embed\/|\.be\/)([a-zA-Z0-9_-]{11})/);
-    return match ? match[1] : null;
-  };
-
-  const videoId = extractYoutubeId(videoUrl);
-  const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+  const { nama, deskripsi, image, videoUrl } = route.params || {};
+  const isYoutubeLink =
+    videoUrl?.includes("youtube.com") || videoUrl?.includes("youtu.be");
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{nama}</Text>
+      <Text style={styles.title}>{nama || "Nama tidak tersedia"}</Text>
 
-      <Image source={{ uri: image }} style={styles.image} />
-
-      <Text style={styles.subTitle}>Deskripsi</Text>
-      <Text style={styles.text}>{deskripsi}</Text>
-
-      <Text style={styles.subTitle}>Video</Text>
-      {videoId ? (
-        <WebView
-          style={styles.video}
-          javaScriptEnabled={true}
-          source={{ uri: embedUrl }}
-        />
+      {image ? (
+        <Image source={{ uri: image }} style={styles.image} />
       ) : (
-        <Text>Tidak ada video tersedia.</Text>
+        <Text>Gambar tidak tersedia</Text>
       )}
 
-      <TouchableOpacity
-        onPress={() => Linking.openURL(videoUrl)}
-        style={styles.linkBtn}
-      >
-        <Text style={styles.linkText}>Buka di YouTube</Text>
-      </TouchableOpacity>
+      <Text style={styles.description}>
+        {deskripsi || "Deskripsi tidak tersedia"}
+      </Text>
+
+      {videoUrl ? (
+        isYoutubeLink ? (
+          <View style={styles.videoContainer}>
+            <WebView
+              source={{ uri: convertYoutubeUrlToEmbed(videoUrl) }}
+              style={styles.webview}
+              javaScriptEnabled
+              domStorageEnabled
+              allowsFullscreenVideo
+            />
+          </View>
+        ) : (
+          <Video
+            source={{ uri: videoUrl }}
+            useNativeControls
+            resizeMode="cover"
+            isLooping
+            style={styles.video}
+          />
+        )
+      ) : (
+        <Text>Video tidak tersedia</Text>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#fff" },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 10 },
-  subTitle: { fontSize: 18, fontWeight: "bold", marginTop: 16, marginBottom: 8 },
-  text: { fontSize: 16, color: "#333" },
+  container: {
+    flex: 1,
+    padding: 15,
+    backgroundColor: "#FFF",
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
   image: {
     width: "100%",
     height: 200,
     borderRadius: 10,
-    resizeMode: "cover",
+    marginBottom: 10,
+  },
+  description: {
+    fontSize: 16,
+    marginBottom: 15,
+    color: "#555",
+  },
+  videoContainer: {
+    height: 200,
+    width: "100%",
+    marginBottom: 20,
+  },
+  webview: {
+    flex: 1,
   },
   video: {
+    width: "100%",
     height: 200,
-    marginTop: 10,
-  },
-  linkBtn: {
-    marginTop: 12,
-    backgroundColor: "#f2f2f2",
-    padding: 10,
-    borderRadius: 6,
-    alignItems: "center",
-  },
-  linkText: {
-    color: "#007AFF",
-    fontWeight: "bold",
+    borderRadius: 10,
   },
 });
 

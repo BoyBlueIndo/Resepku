@@ -11,6 +11,7 @@ import MenuList from "../screens/user/MenuList";
 import AddMenu from "../screens/admin/AddMenu";
 import EditMenu from "../screens/admin/EditMenu";
 import MenuDetail from "../screens/user/MenuDetail";
+import InfoScreen from '../screens/user/InfoScreen';
 
 const Stack = createStackNavigator();
 
@@ -27,6 +28,7 @@ const AppNavigator = () => {
         <Stack.Screen name="AddMenu" component={AddMenu} options={{ title: "Tambah Menu" }} />
         <Stack.Screen name="EditMenu" component={EditMenu} options={{ title: "Edit Menu" }} />
         <Stack.Screen name="MenuDetail" component={MenuDetail} />
+        <Stack.Screen name="Info" component={InfoScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

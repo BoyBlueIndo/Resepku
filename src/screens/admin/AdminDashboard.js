@@ -6,16 +6,16 @@ import {
   FlatList,
   StyleSheet,
   Alert,
+  Image,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import { AuthContext } from "../../context/AuthContext"; // ✅ Tambahkan ini
+import { AuthContext } from "../../context/AuthContext";
 
 const API_URL = "http://192.168.1.9:3000/api/menu";
 
-
 const AdminDashboard = ({ navigation }) => {
   const [menus, setMenus] = useState([]);
-  const { logout } = useContext(AuthContext); // ✅ Ambil logout dari context
+  const { logout } = useContext(AuthContext);
 
   const fetchMenus = async () => {
     try {
@@ -48,9 +48,13 @@ const AdminDashboard = ({ navigation }) => {
 
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
-      <Text style={styles.itemText}>
-        {item.nama} - Rp {item.harga}
-      </Text>
+      <View style={styles.row}>
+        <Image source={{ uri: item.image }} style={styles.image} />
+        <View style={styles.textContainer}>
+          <Text style={styles.itemText}>{item.nama}</Text>
+          <Text style={styles.itemPrice}>Rp {item.harga}</Text>
+        </View>
+      </View>
       <View style={styles.actions}>
         <TouchableOpacity
           onPress={() => navigation.navigate("EditMenu", { menu: item })}
@@ -62,7 +66,11 @@ const AdminDashboard = ({ navigation }) => {
           onPress={() =>
             Alert.alert("Konfirmasi", "Yakin ingin menghapus menu ini?", [
               { text: "Batal", style: "cancel" },
-              { text: "Hapus", style: "destructive", onPress: () => deleteMenu(item._id) },
+              {
+                text: "Hapus",
+                style: "destructive",
+                onPress: () => deleteMenu(item._id),
+              },
             ])
           }
           style={styles.deleteBtn}
@@ -81,7 +89,7 @@ const AdminDashboard = ({ navigation }) => {
         style: "destructive",
         onPress: () => {
           logout();
-          navigation.replace("Login"); // 🚪 Kembali ke login
+          navigation.replace("Login");
         },
       },
     ]);
@@ -143,8 +151,27 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginBottom: 10,
   },
-  itemText: { fontSize: 18, marginBottom: 5 },
-  actions: { flexDirection: "row", justifyContent: "space-between" },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  image: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    marginRight: 10,
+    backgroundColor: "#ddd",
+  },
+  textContainer: {
+    flex: 1,
+  },
+  itemText: { fontSize: 18, fontWeight: "bold" },
+  itemPrice: { fontSize: 16, color: "#666" },
+  actions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
   editBtn: {
     backgroundColor: "#87ceeb",
     padding: 8,

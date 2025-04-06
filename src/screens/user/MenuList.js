@@ -16,6 +16,9 @@ const MenuList = ({ navigation }) => {
   const [menus, setMenus] = useState([]);
   const [filteredMenus, setFilteredMenus] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [minHarga, setMinHarga] = useState("");
+  const [maxHarga, setMaxHarga] = useState("");
+  const [selectedKategori, setSelectedKategori] = useState("");
   const [loading, setLoading] = useState(true);
 
   const fetchMenus = async () => {
@@ -23,7 +26,7 @@ const MenuList = ({ navigation }) => {
       const response = await fetch(API_URL);
       const data = await response.json();
       setMenus(data);
-      setFilteredMenus(data); // Inisialisasi hasil pencarian
+      setFilteredMenus(data);
     } catch (error) {
       console.error("Gagal mengambil menu:", error);
     } finally {
@@ -36,11 +39,18 @@ const MenuList = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    const filtered = menus.filter((menu) =>
-      menu.nama.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filtered = menus.filter((menu) => {
+      const namaCocok = menu.nama.toLowerCase().includes(searchQuery.toLowerCase());
+      const harga = parseInt(menu.harga);
+      const min = parseInt(minHarga);
+      const max = parseInt(maxHarga);
+      const hargaCocok = (!minHarga || harga >= min) && (!maxHarga || harga <= max);
+      const kategoriCocok = selectedKategori === "" || menu.kategori === selectedKategori;
+
+      return namaCocok && hargaCocok && kategoriCocok;
+    });
     setFilteredMenus(filtered);
-  }, [searchQuery, menus]);
+  }, [searchQuery, minHarga, maxHarga, selectedKategori, menus]);
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
@@ -48,7 +58,10 @@ const MenuList = ({ navigation }) => {
       onPress={() => navigation.navigate("MenuDetail", item)}
     >
       <Image source={{ uri: item.image }} style={styles.image} />
-      <Text style={styles.title}>{item.nama}</Text>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.title}>{item.nama}</Text>
+        <Text style={styles.harga}>Rp {item.harga}</Text>
+      </View>
     </TouchableOpacity>
   );
 
@@ -63,12 +76,54 @@ const MenuList = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Daftar Menu</Text>
+
       <TextInput
         style={styles.searchInput}
         placeholder="Cari menu..."
         value={searchQuery}
         onChangeText={setSearchQuery}
       />
+
+      <View style={styles.filterRow}>
+        <TextInput
+          style={styles.filterInput}
+          placeholder="Harga Min"
+          keyboardType="numeric"
+          value={minHarga}
+          onChangeText={setMinHarga}
+        />
+        <TextInput
+          style={styles.filterInput}
+          placeholder="Harga Max"
+          keyboardType="numeric"
+          value={maxHarga}
+          onChangeText={setMaxHarga}
+        />
+      </View>
+
+      {/* Filter Kategori */}
+      <View style={styles.kategoriRow}>
+        {["", "Sarapan", "Utama", "Dessert", "Snack"].map((kategori) => (
+          <TouchableOpacity
+            key={kategori}
+            style={[
+              styles.kategoriButton,
+              selectedKategori === kategori && styles.kategoriButtonSelected,
+            ]}
+            onPress={() => setSelectedKategori(kategori)}
+          >
+            <Text
+              style={[
+                styles.kategoriText,
+                selectedKategori === kategori && styles.kategoriTextSelected,
+              ]}
+            >
+              {kategori === "" ? "Semua" : kategori}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
       <FlatList
         data={filteredMenus}
         keyExtractor={(item) => item._id}
@@ -87,7 +142,43 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     padding: 10,
     borderRadius: 8,
+    marginBottom: 10,
+  },
+  filterRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 16,
+  },
+  filterInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 10,
+    borderRadius: 8,
+    marginRight: 8,
+  },
+  kategoriRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: 16,
+  },
+  kategoriButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: "#E0E0E0",
+    borderRadius: 20,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  kategoriButtonSelected: {
+    backgroundColor: "#00aa00",
+  },
+  kategoriText: {
+    color: "#000",
+    fontWeight: "500",
+  },
+  kategoriTextSelected: {
+    color: "#fff",
   },
   card: {
     flexDirection: "row",
@@ -96,6 +187,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F0F0F0",
     borderRadius: 10,
     overflow: "hidden",
+    paddingRight: 10,
   },
   image: {
     width: 120,
@@ -107,7 +199,12 @@ const styles = StyleSheet.create({
     marginLeft: 16,
     fontSize: 18,
     fontWeight: "500",
-    flexShrink: 1,
+  },
+  harga: {
+    marginLeft: 16,
+    fontSize: 14,
+    color: "green",
+    marginTop: 4,
   },
   center: {
     flex: 1,
