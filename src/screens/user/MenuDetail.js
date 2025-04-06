@@ -44,11 +44,16 @@ const MenuDetail = ({ route }) => {
           </View>
         ) : (
           <Video
-            source={{ uri: videoUrl }}
-            useNativeControls
-            resizeMode="cover"
-            isLooping
-            style={styles.video}
+        source={{ uri: menu.video }}
+        rate={1.0}
+        volume={1.0}
+        isMuted={false}
+        resizeMode="cover"
+        shouldPlay
+        useNativeControls
+        style={{ width: '100%', height: 200 }}
+
+
           />
         )
       ) : (
