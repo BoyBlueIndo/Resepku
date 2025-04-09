@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
+import { API_BASE_URL } from "../../config";
 import {
   View,
   Text,
@@ -13,7 +14,7 @@ import {
 import { AuthContext } from "../../context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 
-const API_URL = "https://5354-2001-448a-2071-482a-25db-1f48-4523-4a3d.ngrok-free.app/api/menu";
+const API_URL = `${API_BASE_URL}/menu`;
 
 const UserHome = ({ navigation }) => {
   const { user, logout } = useContext(AuthContext);
