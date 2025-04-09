@@ -1,9 +1,8 @@
 import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 import { WebView } from "react-native-webview";
-import { Video } from "expo-video";
+import { Video } from "expo-av";
 
-// Fungsi untuk mengubah URL YouTube jadi embed
 const convertYoutubeUrlToEmbed = (url) => {
   if (!url) return "";
   const match = url.match(
@@ -44,16 +43,14 @@ const MenuDetail = ({ route }) => {
           </View>
         ) : (
           <Video
-        source={{ uri: menu.video }}
-        rate={1.0}
-        volume={1.0}
-        isMuted={false}
-        resizeMode="cover"
-        shouldPlay
-        useNativeControls
-        style={{ width: '100%', height: 200 }}
-
-
+            source={{ uri: videoUrl }}
+            rate={1.0}
+            volume={1.0}
+            isMuted={false}
+            resizeMode="cover"
+            shouldPlay
+            useNativeControls
+            style={styles.video}
           />
         )
       ) : (

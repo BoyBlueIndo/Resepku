@@ -13,7 +13,7 @@ import {
 import { AuthContext } from "../../context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 
-const API_URL = "http://192.168.1.9:3000/api/menu";
+const API_URL = "https://5354-2001-448a-2071-482a-25db-1f48-4523-4a3d.ngrok-free.app/api/menu";
 
 const UserHome = ({ navigation }) => {
   const { user, logout } = useContext(AuthContext);
@@ -21,6 +21,7 @@ const UserHome = ({ navigation }) => {
   const [filteredItems, setFilteredItems] = useState([]);
   const [menuList, setMenuList] = useState([]);
   const [menuTerbaru, setMenuTerbaru] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -36,8 +37,7 @@ const UserHome = ({ navigation }) => {
         const response = await fetch(API_URL);
         const data = await response.json();
         setMenuList(data);
-
-        const terbaru = data.slice(-3).reverse(); // ambil 3 menu terakhir
+        const terbaru = data.slice(-3).reverse();
         setMenuTerbaru(terbaru);
       } catch (error) {
         console.error("Gagal mengambil data menu:", error);
@@ -93,6 +93,10 @@ const UserHome = ({ navigation }) => {
     }
   }, [searchQuery]);
 
+  const filteredByCategory = selectedCategory
+    ? menuList.filter((item) => item.kategori === selectedCategory)
+    : menuTerbaru;
+
   return (
     <ImageBackground source={require("../../../assets/image.png")} style={styles.backgroundImage}>
       <ScrollView style={styles.container}>
@@ -131,15 +135,26 @@ const UserHome = ({ navigation }) => {
         {/* Categories */}
         <View style={styles.categoryContainer}>
           {["Sarapan", "Utama", "Dessert", "Snack"].map((category, index) => (
-            <TouchableOpacity key={index} style={styles.categoryButton}>
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.categoryButton,
+                selectedCategory === category && { backgroundColor: "#7AC74F" },
+              ]}
+              onPress={() =>
+                setSelectedCategory(selectedCategory === category ? null : category)
+              }
+            >
               <Text style={styles.categoryText}>{category}</Text>
             </TouchableOpacity>
           ))}
         </View>
 
-        {/* Menu Terbaru */}
+        {/* Menu Terbaru / Filtered */}
         <View style={styles.menuHeaderRow}>
-          <Text style={styles.sectionTitle}>Menu Terbaru</Text>
+          <Text style={styles.sectionTitle}>
+            {selectedCategory ? `Menu ${selectedCategory}` : "Menu Terbaru"}
+          </Text>
           <TouchableOpacity onPress={() => navigation.navigate("MenuList")}>
             <Text style={styles.moreButton}>Lebih banyak</Text>
           </TouchableOpacity>
@@ -151,7 +166,7 @@ const UserHome = ({ navigation }) => {
           <Text style={{ color: "red", textAlign: "center" }}>{error}</Text>
         ) : (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.recommendationContainer}>
-            {menuTerbaru.map((item) => (
+            {filteredByCategory.map((item) => (
               <TouchableOpacity
                 key={item._id || item.nama}
                 style={styles.menuCard}

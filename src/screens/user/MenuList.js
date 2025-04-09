@@ -10,7 +10,7 @@ import {
   TextInput,
 } from "react-native";
 
-const API_URL = "http://192.168.1.9:3000/api/menu";
+const API_URL = "https://5354-2001-448a-2071-482a-25db-1f48-4523-4a3d.ngrok-free.app/api/menu";
 
 const MenuList = ({ navigation }) => {
   const [menus, setMenus] = useState([]);

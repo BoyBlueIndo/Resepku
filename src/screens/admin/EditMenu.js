@@ -10,8 +10,9 @@ import {
   ScrollView,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import { Picker } from "@react-native-picker/picker";
 
-const API_URL = "http://192.168.1.9:3000/api/menu"; // Ganti sesuai IP kamu
+const API_URL = "https://5354-2001-448a-2071-482a-25db-1f48-4523-4a3d.ngrok-free.app/api/menu"; // Ganti sesuai IP kamu
 
 const EditMenu = ({ route, navigation }) => {
   const { menu } = route.params;
@@ -21,6 +22,7 @@ const EditMenu = ({ route, navigation }) => {
   const [deskripsi, setDeskripsi] = useState(menu.deskripsi || "");
   const [videoUrl, setVideoUrl] = useState(menu.videoUrl || "");
   const [image, setImage] = useState(menu.image || "");
+  const [kategori, setKategori] = useState(menu.kategori || "Sarapan");
 
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -43,7 +45,7 @@ const EditMenu = ({ route, navigation }) => {
   };
 
   const handleUpdate = async () => {
-    if (!nama || !harga || !deskripsi || !videoUrl || !image) {
+    if (!nama || !harga || !deskripsi || !videoUrl || !image || !kategori) {
       return Alert.alert("Peringatan", "Semua field harus diisi");
     }
 
@@ -64,6 +66,7 @@ const EditMenu = ({ route, navigation }) => {
           deskripsi,
           videoUrl,
           image,
+          kategori,
         }),
       });
 
@@ -112,6 +115,19 @@ const EditMenu = ({ route, navigation }) => {
         style={styles.input}
       />
 
+      <Text style={styles.label}>Kategori</Text>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={kategori}
+          onValueChange={(itemValue) => setKategori(itemValue)}
+        >
+          <Picker.Item label="Sarapan" value="Sarapan" />
+          <Picker.Item label="Utama" value="Utama" />
+          <Picker.Item label="Dessert" value="Dessert" />
+          <Picker.Item label="Snacks" value="Snacks" />
+        </Picker>
+      </View>
+
       <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
         {image ? (
           <Image source={{ uri: image }} style={styles.imagePreview} />
@@ -144,6 +160,18 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 15,
     fontSize: 16,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 5,
+    marginTop: 10,
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    marginBottom: 15,
   },
   imagePicker: {
     height: 200,
