@@ -145,10 +145,7 @@ useEffect(() => {
           <TouchableOpacity style={styles.logoutButton} onPress={logout}>
             <Text style={styles.logoutText}>Log out</Text>
           </TouchableOpacity>
-          <View style={styles.overlay}>
-            <Text style={styles.headerTitle}>Nasi Goreng</Text>
-            <Text style={styles.headerSubtitle}>⏱ 15 Menit</Text>
-          </View>
+
         </View>
 
         {/* Search Bar */}
@@ -259,7 +256,16 @@ useEffect(() => {
             <TouchableOpacity
               key={item.id}
               style={styles.infoCard}
-              onPress={() => navigation.navigate("Info", { type: item.type })}
+              onPress={() => {
+                if (item.type === "Tips") {
+                  navigation.navigate("Tips");
+                } else if (item.type === "diet") {
+                  navigation.navigate("Diet");
+                } else if (item.type === "mudah") {
+                  navigation.navigate("Mudah");
+                }
+              }}
+              
             >
               <Image source={item.image} style={styles.infoImage} />
               <Text style={styles.infoText}>{item.title}</Text>

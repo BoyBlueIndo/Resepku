@@ -14,6 +14,7 @@ import MenuDetail from "../screens/user/MenuDetail";
 import TipsScreen from '../screens/info/TipsScreen';
 import DietScreen from '../screens/info/DietScreen';
 import MudahScreen from '../screens/info/MudahScreen';
+import InfoScreen from '../screens/user/InfoScreen';
 
 const Stack = createStackNavigator();
 
@@ -33,6 +34,7 @@ const AppNavigator = () => {
         <Stack.Screen name="Tips" component={TipsScreen} />
         <Stack.Screen name="Diet" component={DietScreen} />
         <Stack.Screen name="Mudah" component={MudahScreen} />
+        <Stack.Screen name="Info" component={InfoScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
