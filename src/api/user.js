@@ -1,8 +1,8 @@
-import API_URL from '../config/config';
+import { API_BASE_URL } from "../../config/config";
 
 export const getUserProfile = async (token) => {
     try {
-        const response = await fetch(`${API_URL}/user/profile`, {
+        const response = await fetch(`${API_BASE_URL}/api/user/profile`, {
             method: "GET",
             headers: { "Authorization": `Bearer ${token}` },
         });

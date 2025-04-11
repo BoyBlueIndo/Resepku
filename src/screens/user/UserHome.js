@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { API_BASE_URL } from "../../config";
+import { API_MENU_URL } from "../../config/config";
 import {
   View,
   Text,
@@ -13,8 +13,6 @@ import {
 } from "react-native";
 import { AuthContext } from "../../context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
-
-const API_URL = `${API_BASE_URL}/menu`;
 
 const UserHome = ({ navigation }) => {
   const { user, logout } = useContext(AuthContext);
@@ -35,7 +33,12 @@ const UserHome = ({ navigation }) => {
   useEffect(() => {
     const fetchMenus = async () => {
       try {
-        const response = await fetch(API_URL);
+        const response = await fetch(API_MENU_URL, {
+          headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+          },
+        });
         const data = await response.json();
         setMenuList(data);
         const terbaru = data.slice(-3).reverse();
@@ -50,11 +53,20 @@ const UserHome = ({ navigation }) => {
     fetchMenus();
   }, []);
 
-  const foodItems = [
-    { id: 1, name: "Nasi Goreng", image: require("../../../assets/nasi_goreng.jpg") },
-    { id: 2, name: "Ayam Bakar", image: require("../../../assets/menu1.jpg") },
-    { id: 3, name: "Sate Ayam", image: require("../../../assets/menu2.jpg") },
-  ];
+  useEffect(() => {
+    if (searchQuery) {
+      const results = menuList.filter((item) =>
+        item.nama.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredItems(results);
+    } else {
+      setFilteredItems([]);
+    }
+  }, [searchQuery, menuList]);
+
+  const filteredByCategory = selectedCategory
+    ? menuList.filter((item) => item.kategori === selectedCategory)
+    : menuTerbaru;
 
   const infoItems = [
     {
@@ -77,33 +89,18 @@ const UserHome = ({ navigation }) => {
     },
   ];
 
-  const filteredMenuList = searchQuery
-    ? menuList.filter((item) =>
-        item.nama.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : menuList;
-
-  useEffect(() => {
-    if (searchQuery) {
-      const results = foodItems.filter((item) =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredItems(results);
-    } else {
-      setFilteredItems([]);
-    }
-  }, [searchQuery]);
-
-  const filteredByCategory = selectedCategory
-    ? menuList.filter((item) => item.kategori === selectedCategory)
-    : menuTerbaru;
-
   return (
-    <ImageBackground source={require("../../../assets/image.png")} style={styles.backgroundImage}>
+    <ImageBackground
+      source={require("../../../assets/image.png")}
+      style={styles.backgroundImage}
+    >
       <ScrollView style={styles.container}>
         {/* Header */}
         <View style={styles.headerContainer}>
-          <Image source={require("../../../assets/nasi_goreng.jpg")} style={styles.headerImage} />
+          <Image
+            source={require("../../../assets/nasi_goreng.jpg")}
+            style={styles.headerImage}
+          />
           <TouchableOpacity style={styles.logoutButton} onPress={logout}>
             <Text style={styles.logoutText}>Log out</Text>
           </TouchableOpacity>
@@ -126,9 +123,26 @@ const UserHome = ({ navigation }) => {
 
         {/* Search Results */}
         {filteredItems.length > 0 && (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.searchResults}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.searchResults}
+          >
             {filteredItems.map((item) => (
-              <Image key={item.id} source={item.image} style={styles.recommendationImage} />
+              <TouchableOpacity
+                key={item._id}
+                onPress={() =>
+                  navigation.navigate("MenuDetail", {
+                    id: item._id,
+                    nama: item.nama,
+                    deskripsi: item.deskripsi,
+                    image: item.image,
+                    videoUrl: item.videoUrl,
+                  })
+                }
+              >
+                <Image source={{ uri: item.image }} style={styles.recommendationImage} />
+              </TouchableOpacity>
             ))}
           </ScrollView>
         )}
@@ -166,25 +180,27 @@ const UserHome = ({ navigation }) => {
         ) : error ? (
           <Text style={{ color: "red", textAlign: "center" }}>{error}</Text>
         ) : (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.recommendationContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.recommendationContainer}
+          >
             {filteredByCategory.map((item) => (
               <TouchableOpacity
-                key={item._id || item.nama}
+                key={item._id}
                 style={styles.menuCard}
                 onPress={() =>
                   navigation.navigate("MenuDetail", {
                     id: item._id,
                     nama: item.nama,
                     deskripsi: item.deskripsi,
-                    image: `http://192.168.1.9:3000/${item.gambar}`,
-                    videoUrl: item.video?.includes("http")
-                      ? item.video
-                      : `http://192.168.1.9:3000/${item.video}`,
+                    image: item.image,
+                    videoUrl: item.videoUrl,
                   })
                 }
               >
                 <Image
-                  source={{ uri: `http://192.168.1.9:3000/${item.gambar}` }}
+                  source={{ uri: item.image }}
                   style={styles.menuImage}
                   resizeMode="cover"
                 />
@@ -218,11 +234,23 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#D9F99D" },
   backgroundImage: { flex: 1, resizeMode: "cover" },
   headerContainer: { position: "relative" },
-  headerImage: { width: "100%", height: 200, borderBottomLeftRadius: 20, borderBottomRightRadius: 20 },
+  headerImage: {
+    width: "100%",
+    height: 200,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
   overlay: { position: "absolute", bottom: 20, left: 20 },
   headerTitle: { fontSize: 22, fontWeight: "bold", color: "#fff" },
   headerSubtitle: { fontSize: 16, color: "#fff" },
-  logoutButton: { position: "absolute", top: 10, right: 10, backgroundColor: "#7AC74F", padding: 8, borderRadius: 5 },
+  logoutButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "#7AC74F",
+    padding: 8,
+    borderRadius: 5,
+  },
   logoutText: { color: "#fff", fontWeight: "bold" },
   searchContainer: {
     flexDirection: "row",
@@ -235,10 +263,23 @@ const styles = StyleSheet.create({
   searchIcon: { marginRight: 10 },
   searchInput: { flex: 1 },
   searchResults: { flexDirection: "row", margin: 10 },
-  categoryContainer: { flexDirection: "row", justifyContent: "space-around", marginHorizontal: 15, marginVertical: 10 },
-  categoryButton: { backgroundColor: "#A7D397", padding: 10, borderRadius: 10 },
+  categoryContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginHorizontal: 15,
+    marginVertical: 10,
+  },
+  categoryButton: {
+    backgroundColor: "#A7D397",
+    padding: 10,
+    borderRadius: 10,
+  },
   categoryText: { fontWeight: "bold" },
-  sectionTitle: { fontSize: 18, fontWeight: "bold", color: "#333" },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
   menuHeaderRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -251,9 +292,21 @@ const styles = StyleSheet.create({
     color: "#7AC74F",
     fontWeight: "bold",
   },
-  recommendationContainer: { flexDirection: "row", marginHorizontal: 15, marginVertical: 10 },
-  recommendationImage: { width: 150, height: 100, borderRadius: 10, marginRight: 10 },
-  infoContainer: { paddingHorizontal: 15, marginBottom: 20 },
+  recommendationContainer: {
+    flexDirection: "row",
+    marginHorizontal: 15,
+    marginVertical: 10,
+  },
+  recommendationImage: {
+    width: 150,
+    height: 100,
+    borderRadius: 10,
+    marginRight: 10,
+  },
+  infoContainer: {
+    paddingHorizontal: 15,
+    marginBottom: 20,
+  },
   infoCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -262,8 +315,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 10,
   },
-  infoImage: { width: 150, height: 100, borderRadius: 5, marginRight: 15 },
-  infoText: { flex: 1, fontSize: 16, fontWeight: "600", color: "#333" },
+  infoImage: {
+    width: 150,
+    height: 100,
+    borderRadius: 5,
+    marginRight: 15,
+  },
+  infoText: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+  },
   arrowIcon: { marginLeft: 10 },
   menuCard: {
     marginRight: 10,

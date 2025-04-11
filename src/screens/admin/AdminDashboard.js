@@ -1,5 +1,6 @@
+import { API_BASE_URL } from '../../config/config';
 import React, { useState, useCallback, useContext } from "react";
-import { API_BASE_URL } from "../../config";
+import { API_MENU_URL } from "../../config/config";
 import {
   View,
   Text,
@@ -12,34 +13,34 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 import { AuthContext } from "../../context/AuthContext";
 
-const API_URL = `${API_BASE_URL}/menu`;
-
 const AdminDashboard = ({ navigation }) => {
   const [menus, setMenus] = useState([]);
   const { logout } = useContext(AuthContext);
 
   const fetchMenus = async () => {
     try {
-      const response = await fetch(API_URL);
+      const response = await fetch(API_MENU_URL); // ✅ sekarang /api/menu
       const data = await response.json();
       setMenus(data);
     } catch (error) {
       console.error("Gagal mengambil data menu:", error);
     }
   };
+  
 
   const deleteMenu = async (id) => {
     try {
-      await fetch(`${API_URL}/${id}`, {
+      await fetch(`${API_MENU_URL}/${id}`, {
         method: "DELETE",
       });
       Alert.alert("Berhasil", "Menu berhasil dihapus");
-      fetchMenus();
+      fetchMenus(); // Refresh list setelah hapus
     } catch (error) {
       console.error("Gagal menghapus menu:", error);
       Alert.alert("Error", "Gagal menghapus menu");
     }
   };
+  
 
   useFocusEffect(
     useCallback(() => {
@@ -50,7 +51,7 @@ const AdminDashboard = ({ navigation }) => {
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
       <View style={styles.row}>
-        <Image source={{ uri: item.image }} style={styles.image} />
+      <Image source={{ uri: item.image }} style={styles.image} />
         <View style={styles.textContainer}>
           <Text style={styles.itemText}>{item.nama}</Text>
           <Text style={styles.itemPrice}>Rp {item.harga}</Text>

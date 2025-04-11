@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { API_BASE_URL } from "../../config";
+import { API_URL } from "../../config/config";
 import {
   View,
   TextInput,
@@ -13,8 +13,6 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Picker } from "@react-native-picker/picker";
-
-const API_URL = `${API_BASE_URL}/menu`;
 
 const AddMenu = ({ navigation }) => {
   const [nama, setNama] = useState("");
@@ -51,7 +49,7 @@ const AddMenu = ({ navigation }) => {
     }
 
     try {
-      const response = await fetch(API_URL, {
+      const response = await fetch(API_MENU_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nama, harga, deskripsi, videoUrl, image, kategori }),

@@ -1,8 +1,8 @@
-import API_URL from '../config/config';
+import { API_BASE_URL } from '../config/config';
 import { Alert } from "react-native";
 
-if (!API_URL) {
-    console.error("❌ ERROR: API_URL tidak ditemukan! Periksa config.js");
+if (!API_BASE_URL) {
+    console.error("❌ ERROR: API_BASE_URL tidak ditemukan! Periksa config.js");
 }
 
 const parseResponse = async (response) => {
@@ -23,14 +23,14 @@ export const login = async (email, password) => {
     try {
         console.log("📤 Mengirim data login:", { email, password });
 
-        const response = await fetch(`${API_URL}/api/auth/login`, {
+        const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password }),
         });
 
         const data = await parseResponse(response);
-        console.log(`✅ [LOGIN] Status: ${response.status}, Headers:`, response.headers);
+        console.log(`✅ [LOGIN] Status: ${response.status}`);
         console.log("📩 Response Body:", data);
 
         if (!response.ok) {
@@ -54,14 +54,14 @@ export const register = async (name, email, password) => {
     try {
         console.log("📤 Mengirim data registrasi:", { name, email, password });
 
-        const response = await fetch(`${API_URL}/auth/register`, {
+        const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name, email, password }),
         });
 
         const data = await parseResponse(response);
-        console.log(`✅ [REGISTER] Status: ${response.status}, Headers:`, response.headers);
+        console.log(`✅ [REGISTER] Status: ${response.status}`);
         console.log("📩 Response Body:", data);
 
         if (!response.ok) {

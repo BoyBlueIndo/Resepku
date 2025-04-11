@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { API_BASE_URL } from "../../config";
+import { API_MENU_URL } from "../../config/config";
 import {
   View,
   Text,
@@ -12,7 +12,6 @@ import {
 } from "react-native";
 
 
-const API_URL = `${API_BASE_URL}/menu`;
 
 const MenuList = ({ navigation }) => {
   const [menus, setMenus] = useState([]);
@@ -25,7 +24,7 @@ const MenuList = ({ navigation }) => {
 
   const fetchMenus = async () => {
     try {
-      const response = await fetch(API_URL);
+      const response = await fetch(API_MENU_URL);
       const data = await response.json();
       setMenus(data);
       setFilteredMenus(data);

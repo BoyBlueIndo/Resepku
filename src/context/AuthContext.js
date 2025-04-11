@@ -1,23 +1,25 @@
 import React, { createContext, useState } from "react";
 import { Alert } from "react-native";
+import { API_LOGIN_URL } from "../config/config"; // pakai yang benar
+
 
 const AuthContext = createContext();
 
 // ✅ Diperbaiki: API_URL tanpa /login
-const API_URL = "https://d4c5-2001-448a-2071-482a-25db-1f48-4523-4a3d.ngrok-free.app/auth";
+
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
 
     const handleLogin = async (email, password) => {
         try {
-          console.log("🔄 Mengirim request ke:", `${API_URL}/login`);
-      
-          const response = await fetch(`${API_URL}/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
-          });
+          console.log("🔄 Mengirim request ke:", API_LOGIN_URL);
+            const response = await fetch(API_LOGIN_URL, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email, password }),
+            });
+
       
           const text = await response.text();
           console.log("🧾 Response mentah dari server:", text);

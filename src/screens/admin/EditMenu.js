@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { API_BASE_URL } from "../../config";
+import { API_MENU_URL } from "../../config/config";
 import {
   View,
   Text,
@@ -12,9 +12,6 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Picker } from "@react-native-picker/picker";
-
-
-const API_URL = `${API_BASE_URL}/menu`;// Ganti sesuai IP kamu
 
 const EditMenu = ({ route, navigation }) => {
   const { menu } = route.params;
@@ -57,7 +54,7 @@ const EditMenu = ({ route, navigation }) => {
     }
 
     try {
-      const response = await fetch(`${API_URL}/${menu._id}`, {
+      const response = await fetch(`${API_MENU_URL}/${menu._id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
