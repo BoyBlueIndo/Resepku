@@ -30,50 +30,90 @@ const UserHome = ({ navigation }) => {
     }
   }, [user]);
 
-  useEffect(() => {
-    const fetchMenus = async () => {
-      try {
-        const response = await fetch(API_MENU_URL, {
-          headers: {
-            "Content-Type": "application/json",
-            "ngrok-skip-browser-warning": "true",
-          },
-        });
-        const data = await response.json();
-        setMenuList(data);
-        const terbaru = data.slice(-3).reverse();
-        setMenuTerbaru(terbaru);
-      } catch (error) {
-        console.error("Gagal mengambil data menu:", error);
-        setError("Gagal mengambil data menu");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchMenus();
-  }, []);
+// 1. Ambil data menu
+// 1. Ambil data menu
+useEffect(() => {
+  const fetchMenus = async () => {
+    try {
+      const response = await fetch(API_MENU_URL, {
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+        },
+      });
 
-  useEffect(() => {
-    if (searchQuery) {
-      const results = menuList.filter((item) =>
-        item.nama.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredItems(results);
-    } else {
-      setFilteredItems([]);
+      const data = await response.json();
+      console.log("📦 Data menu dari backend:", data.map(item => ({
+        nama: item.nama,
+        kategori: item.kategori,
+      })));
+
+      setMenuList(data);
+
+      // Ambil 3 menu terakhir sebagai menu terbaru
+      const terbaru = data.slice(-3).reverse();
+      setMenuTerbaru(terbaru);
+    } catch (error) {
+      console.error("❌ Gagal mengambil data menu:", error);
+      setError("Gagal mengambil data menu");
+    } finally {
+      setLoading(false);
     }
-  }, [searchQuery, menuList]);
+  };
+
+  fetchMenus();
+}, []);
+
+
+// 2. Filter berdasarkan pencarian
+useEffect(() => {
+  if (searchQuery) {
+    const results = menuList.filter((item) =>
+      item.nama?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredItems(results);
+  } else {
+    setFilteredItems([]);
+  }
+}, [searchQuery, menuList]);
+
+
+// 3. Filter berdasarkan kategori
+useEffect(() => {
+  console.log("📌 Kategori dipilih:", selectedCategory);
+
+  console.log("📚 Semua kategori dari menuList:");
+  menuList.forEach(item => console.log(`"${item.kategori}"`));
+
+  if (selectedCategory) {
+    const filtered = menuList.filter((item) => {
+      const kategoriItem = item.kategori?.toLowerCase().trim();
+      const kategoriSelected = selectedCategory.toLowerCase().trim();
+      return kategoriItem === kategoriSelected;
+    });
+
+    console.log("🔍 Hasil filter kategori:", filtered.map(item => ({
+      nama: item.nama,
+      kategori: item.kategori,
+    })));
+
+    setFilteredItems(filtered);
+  } else {
+    setFilteredItems([]);
+  }
+}, [selectedCategory, menuList]);
 
   const filteredByCategory = selectedCategory
     ? menuList.filter((item) => item.kategori === selectedCategory)
     : menuTerbaru;
 
   const infoItems = [
+    
     {
       id: 1,
       title: "Beberapa tips dalam memasak agar lebih memudahkan",
       image: require("../../../assets/tips.jpg"),
-      type: "tips",
+      type: "Tips",
     },
     {
       id: 2,
@@ -87,6 +127,7 @@ const UserHome = ({ navigation }) => {
       image: require("../../../assets/mudah.jpg"),
       type: "mudah",
     },
+    
   ];
 
   return (
@@ -149,7 +190,7 @@ const UserHome = ({ navigation }) => {
 
         {/* Categories */}
         <View style={styles.categoryContainer}>
-          {["Sarapan", "Utama", "Dessert", "Snack"].map((category, index) => (
+          {["Sarapan", "Utama", "Dessert", "Snacks"].map((category, index) => (
             <TouchableOpacity
               key={index}
               style={[
@@ -186,26 +227,27 @@ const UserHome = ({ navigation }) => {
             style={styles.recommendationContainer}
           >
             {filteredByCategory.map((item) => (
-              <TouchableOpacity
-                key={item._id}
-                style={styles.menuCard}
-                onPress={() =>
-                  navigation.navigate("MenuDetail", {
-                    id: item._id,
-                    nama: item.nama,
-                    deskripsi: item.deskripsi,
-                    image: item.image,
-                    videoUrl: item.videoUrl,
-                  })
-                }
-              >
-                <Image
-                  source={{ uri: item.image }}
-                  style={styles.menuImage}
-                  resizeMode="cover"
-                />
-                <Text style={styles.menuTitle}>{item.nama}</Text>
-              </TouchableOpacity>
+             <TouchableOpacity
+             key={item._id}
+             style={styles.menuCard}
+             onPress={() =>
+               navigation.navigate("MenuDetail", {
+                 id: item._id,
+                 nama: item.nama,
+                 deskripsi: item.deskripsi,
+                 image: item.image,
+                 videoUrl: item.videoUrl,
+               })
+             }
+           >
+             <Image
+               source={{ uri: item.image }}
+               style={styles.menuImage}
+               resizeMode="cover"
+             />
+             <Text style={styles.menuTitle}>{item.nama}</Text>
+           </TouchableOpacity>
+           
             ))}
           </ScrollView>
         )}

@@ -104,7 +104,7 @@ const MenuList = ({ navigation }) => {
 
       {/* Filter Kategori */}
       <View style={styles.kategoriRow}>
-        {["", "Sarapan", "Utama", "Dessert", "Snack"].map((kategori) => (
+        {["", "Sarapan", "Utama", "Dessert", "Snacks"].map((kategori) => (
           <TouchableOpacity
             key={kategori}
             style={[

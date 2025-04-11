@@ -124,7 +124,7 @@ const AdminDashboard = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
+  container: { flex: 1, padding: 20, backgroundColor: "rgb(57, 161, 57) " },
   headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -133,19 +133,21 @@ const styles = StyleSheet.create({
   },
   title: { fontSize: 24, fontWeight: "bold" },
   logoutBtn: {
-    backgroundColor: "#FF6347",
+    backgroundColor: "rgb(30, 114, 24)",
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 5,
   },
-  logoutText: { color: "#fff", fontWeight: "bold" },
+  logoutText: { color: "#000000", fontWeight: "bold" },
+
   addButton: {
-    backgroundColor: "#90ee90",
+    backgroundColor: "#fff",
     padding: 12,
     borderRadius: 5,
     alignItems: "center",
     marginBottom: 15,
   },
+
   addButtonText: { fontSize: 16, fontWeight: "bold" },
   itemContainer: {
     padding: 15,
@@ -153,11 +155,13 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginBottom: 10,
   },
+
   row: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 10,
   },
+  
   image: {
     width: 80,
     height: 80,
