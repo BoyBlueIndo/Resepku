@@ -15,6 +15,8 @@ import TipsScreen from '../screens/info/TipsScreen';
 import DietScreen from '../screens/info/DietScreen';
 import MudahScreen from '../screens/info/MudahScreen';
 import InfoScreen from '../screens/user/InfoScreen';
+import FavoriteMenu from "../screens/user/FavoriteMenu"; // Sesuaikan path sesuai lokasi file FavoriteMenu.js
+
 
 const Stack = createStackNavigator();
 
@@ -35,6 +37,7 @@ const AppNavigator = () => {
         <Stack.Screen name="Diet" component={DietScreen} />
         <Stack.Screen name="Mudah" component={MudahScreen} />
         <Stack.Screen name="Info" component={InfoScreen} />
+        <Stack.Screen name="FavoriteMenu" component={FavoriteMenu} />
       </Stack.Navigator>
     </NavigationContainer>
   );

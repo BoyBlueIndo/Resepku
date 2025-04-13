@@ -1,10 +1,11 @@
 import React, { useState, useContext } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, Alert } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, Alert, ActivityIndicator } from "react-native";
 import { AuthContext } from "../context/AuthContext";
 
 const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);  // State untuk indikator loading
     const { handleLogin } = useContext(AuthContext);
 
     const onLogin = async () => {
@@ -12,7 +13,9 @@ const LoginScreen = ({ navigation }) => {
             Alert.alert("Error", "Email dan Password harus diisi!");
             return;
         }
-    
+
+        setLoading(true);  // Mulai loading
+
         try {
             const role = await handleLogin(email, password);
 
@@ -25,13 +28,13 @@ const LoginScreen = ({ navigation }) => {
             } else {
                 Alert.alert("Error", "Role tidak dikenali.");
             }
-            
         } catch (error) {
             console.error("Error saat login:", error);
             Alert.alert("Error", "Terjadi kesalahan saat login.");
+        } finally {
+            setLoading(false);  // Selesai loading
         }
     };
-    
 
     return (
         <ImageBackground source={require("../../assets/image.png")} style={styles.background}>
@@ -44,6 +47,7 @@ const LoginScreen = ({ navigation }) => {
                     value={email}
                     onChangeText={setEmail}
                     autoCapitalize="none"
+                    autoFocus
                 />
                 <TextInput
                     style={styles.input}
@@ -53,8 +57,12 @@ const LoginScreen = ({ navigation }) => {
                     value={password}
                     onChangeText={setPassword}
                 />
-                <TouchableOpacity style={styles.button} onPress={onLogin}>
-                    <Text style={styles.buttonText}>LOGIN</Text>
+                <TouchableOpacity style={styles.button} onPress={onLogin} disabled={loading}>
+                    {loading ? (
+                        <ActivityIndicator size="small" color="#000" />
+                    ) : (
+                        <Text style={styles.buttonText}>LOGIN</Text>
+                    )}
                 </TouchableOpacity>
                 <Text style={styles.linkText}>
                     Don’t have an account?{" "}
