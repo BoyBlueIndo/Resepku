@@ -1,68 +1,125 @@
-const AuthContext = createContext();
+import React, { useEffect, useState, useContext } from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from 'react-native';
+import { API_MENU_URL } from "../../config/config";
+import { AuthContext } from '../../context/AuthContext';
+import { useNavigation } from '@react-navigation/native';
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+const MenuList = () => {
+  const [menus, setMenus] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { userInfo } = useContext(AuthContext);
+  const navigation = useNavigation();
 
-  const handleLogin = async (email, password) => {
-    try {
-      const response = await fetch(API_LOGIN_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const text = await response.text();
-
-      let data;
+  useEffect(() => {
+    const fetchMenuList = async () => {
       try {
-        data = JSON.parse(text);
-      } catch (jsonError) {
-        Alert.alert("Error", "Response dari server bukan JSON.");
-        return false;
-      }
+        const response = await fetch(API_MENU_URL);
+        const data = await response.json();
 
-      if (response.ok) {
-        if (!data.user || !data.user.role) {
-          Alert.alert("Error", "Role pengguna tidak ditemukan.");
-          return false;
-        }
-
-        const userRole = data.user.role;
-        const userData = {
-          token: data.token,
-          role: userRole,
-          userId: data.user._id,
-        };
-
-        setUser(userData);
-
-        if (userRole === "admin") {
-          return "admin";
-        } else if (userRole === "user") {
-          return "user";
+        if (response.ok) {
+          setMenus(data.menus || []); // Pastikan tetap array jika undefined
         } else {
-          Alert.alert("Error", "Role tidak valid.");
-          return false;
+          alert("Failed to load menu");
         }
-      } else {
-        Alert.alert("Login Gagal", data.msg || "Email atau password salah.");
-        return false;
+      } catch (error) {
+        alert("Error while loading the menu");
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      Alert.alert("Error", "Gagal menghubungi server.");
-      return false;
-    }
+    };
+
+    fetchMenuList();
+  }, []);
+
+  const handleMenuPress = (menuId) => {
+    navigation.navigate('MenuDetail', { menuId });
   };
 
-  const logout = () => {
-    setUser(null);
-  };
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
 
   return (
-    <AuthContext.Provider value={{ user, handleLogin, logout }}>
-      {children}
-    </AuthContext.Provider>
+    <View style={styles.container}>
+      <Text style={styles.header}>Menu List</Text>
+
+      {Array.isArray(menus) && menus.length === 0 ? (
+        <Text style={styles.noDataText}>No menu available.</Text>
+      ) : (
+        <FlatList
+          data={menus || []}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleMenuPress(item._id)}
+            >
+              <Image
+                source={{ uri: item.imageUrl }}
+                style={styles.menuImage}
+              />
+              <View style={styles.menuDetails}>
+                <Text style={styles.menuName}>{item.name}</Text>
+                <Text style={styles.menuPrice}>Rp {item.price}</Text>
+              </View>
+            </TouchableOpacity>
+          )}
+        />
+      )}
+    </View>
   );
 };
 
-export { AuthContext };
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 10,
+    backgroundColor: '#fff',
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noDataText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: 'gray',
+  },
+  menuItem: {
+    flexDirection: 'row',
+    padding: 10,
+    marginBottom: 10,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    elevation: 3,
+  },
+  menuImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+  },
+  menuDetails: {
+    marginLeft: 10,
+    justifyContent: 'center',
+  },
+  menuName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  menuPrice: {
+    fontSize: 16,
+    color: '#888',
+  },
+});
+
+export default MenuList;

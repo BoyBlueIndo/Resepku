@@ -1,7 +1,7 @@
 // src/config/config.js
 
 // ✅ URL utama
-export const API_BASE_URL = "https://6c62-2001-448a-2071-482a-8d13-c117-eec6-3ceb.ngrok-free.app";
+export const API_BASE_URL = "https://4bf4-2001-448a-2071-3037-c8b6-aafe-28cc-9454.ngrok-free.app";
 export const API_URL = `${API_BASE_URL}/api`; // base endpoint
 
 // ✅ Sesuaikan dengan prefix "/auth" dari backend

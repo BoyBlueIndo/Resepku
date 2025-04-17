@@ -115,7 +115,7 @@ const MenuDetail = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 15, backgroundColor: "#FFF" },
+  container: { flex: 1, padding: 15, paddingTop:50,backgroundColor: "#FFF" },
   headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 },
   title: { fontSize: 22, fontWeight: "bold", color: "#222", flex: 1 },
   iconButton: { marginLeft: 10 },

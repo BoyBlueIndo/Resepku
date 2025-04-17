@@ -1,29 +1,26 @@
 import React, { useState, useEffect, useContext } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  Image,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from "react-native";
 import { AuthContext } from "../../context/AuthContext";
 import { API_GET_FAVORITES_URL } from "../../config/config";
 
 const FavoriteMenu = ({ navigation }) => {
-    const { userInfo } = useContext(AuthContext);
-    const userId = userInfo?._id;    
+  const { userInfo } = useContext(AuthContext);
+  const userId = userInfo?._id;
 
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!userId) return;
+    setLoading(true);
     fetch(API_GET_FAVORITES_URL(userId))
       .then((res) => res.json())
       .then((data) => setFavorites(data))
-      .catch((err) => console.error("Error fetching favorites:", err))
+      .catch((err) => {
+        console.error("Error fetching favorites:", err);
+        setError("Gagal memuat data favorit.");
+      })
       .finally(() => setLoading(false));
   }, [userId]);
 
@@ -56,6 +53,14 @@ const FavoriteMenu = ({ navigation }) => {
     );
   }
 
+  if (error) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
+
   if (!favorites.length) {
     return (
       <View style={styles.center}>
@@ -80,6 +85,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFF" },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   emptyText: { fontSize: 16, color: "#555" },
+  errorText: { fontSize: 16, color: "red" },
   card: {
     flexDirection: "row",
     marginBottom: 12,

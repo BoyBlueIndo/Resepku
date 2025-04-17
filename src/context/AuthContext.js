@@ -1,11 +1,29 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useState, useEffect } from 'react';
 import { Alert } from "react-native";
 import { API_LOGIN_URL } from "../config/config";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [userInfo, setUserInfo] = useState(null);
+
+  // Cek status login ketika aplikasi dimulai
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const token = await AsyncStorage.getItem('userToken');
+        if (token) {
+          // Jika token ditemukan, simpan ke state userInfo
+          setUserInfo({ token });
+        }
+      } catch (error) {
+        console.error("Error checking login status:", error);
+      }
+    };
+
+    checkLoginStatus();
+  }, []);
 
   const handleLogin = async (email, password) => {
     try {
@@ -15,17 +33,10 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ email, password }),
       });
 
-      const text = await response.text();
-
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch (jsonError) {
-        Alert.alert("Error", "Response dari server bukan JSON.");
-        return false;
-      }
-
       if (response.ok) {
+        const data = await response.json();
+        console.log(data); // Menampilkan data yang diterima
+
         if (!data.user || !data.user.role) {
           Alert.alert("Error", "Role pengguna tidak ditemukan.");
           return false;
@@ -35,17 +46,15 @@ export const AuthProvider = ({ children }) => {
         const userData = {
           token: data.token,
           role: userRole,
-          _id: data.user._id, // penting: ini dipakai di FavoriteMenu.js
+          _id: data.user._id,
         };
 
         setUserInfo(userData);
+        await AsyncStorage.setItem('userToken', data.token);
 
-        if (userRole === "admin") return "admin";
-        if (userRole === "user") return "user";
-
-        Alert.alert("Error", "Role tidak valid.");
-        return false;
+        return userRole; // Return role to use in LoginScreen
       } else {
+        const data = await response.json();
         Alert.alert("Login Gagal", data.msg || "Email atau password salah.");
         return false;
       }
@@ -53,10 +62,16 @@ export const AuthProvider = ({ children }) => {
       Alert.alert("Error", "Gagal menghubungi server.");
       return false;
     }
-  };
+  }
 
-  const logout = () => {
-    setUserInfo(null);
+  const logout = async () => {
+    try {
+      // Hapus token dari AsyncStorage saat logout
+      await AsyncStorage.removeItem('userToken');
+      setUserInfo(null); // Menghapus userInfo dari state
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
   };
 
   return (

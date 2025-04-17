@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, Text, StyleSheet } from 'react-native';
 
 const TipsScreen = () => {
   return (

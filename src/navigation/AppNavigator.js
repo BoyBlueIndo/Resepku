@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
+import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from "@react-navigation/stack";
-import { NavigationContainer } from "@react-navigation/native";
+import { AuthContext } from "../context/AuthContext"; // import AuthContext
 
+// Import all screens
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import UserHome from "../screens/user/UserHome";
@@ -15,31 +17,42 @@ import TipsScreen from '../screens/info/TipsScreen';
 import DietScreen from '../screens/info/DietScreen';
 import MudahScreen from '../screens/info/MudahScreen';
 import InfoScreen from '../screens/user/InfoScreen';
-import FavoriteMenu from "../screens/user/FavoriteMenu"; // Sesuaikan path sesuai lokasi file FavoriteMenu.js
-
+import FavoriteMenu from "../screens/user/FavoriteMenu";
 
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
+  const { userInfo } = useContext(AuthContext); // Getting login status from context
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Register" component={RegisterScreen} />
-        <Stack.Screen name="UserHome" component={UserHome} />
-        <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
-        <Stack.Screen name="ManageUsers" component={ManageUsers} />
-        <Stack.Screen name="MenuList" component={MenuList} />
-        <Stack.Screen name="AddMenu" component={AddMenu} options={{ title: "Tambah Menu" }} />
-        <Stack.Screen name="EditMenu" component={EditMenu} options={{ title: "Edit Menu" }} />
-        <Stack.Screen name="MenuDetail" component={MenuDetail} />       
-        <Stack.Screen name="Tips" component={TipsScreen} />
-        <Stack.Screen name="Diet" component={DietScreen} />
-        <Stack.Screen name="Mudah" component={MudahScreen} />
-        <Stack.Screen name="Info" component={InfoScreen} />
-        <Stack.Screen name="FavoriteMenu" component={FavoriteMenu} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {/* Always register Login & Register */}
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="Register" component={RegisterScreen} />
+
+      {userInfo && userInfo.role ? (
+        userInfo.role === "admin" ? (
+          <>
+            <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
+            <Stack.Screen name="AddMenu" component={AddMenu} />
+            <Stack.Screen name="EditMenu" component={EditMenu} />
+            <Stack.Screen name="ManageUsers" component={ManageUsers} />
+            <Stack.Screen name="MenuDetail" component={MenuDetail} />
+          </>
+        ) : (
+          <>
+            <Stack.Screen name="UserHome" component={UserHome} />
+            <Stack.Screen name="MenuList" component={MenuList} />
+            <Stack.Screen name="MenuDetail" component={MenuDetail} />
+            <Stack.Screen name="Tips" component={TipsScreen} />
+            <Stack.Screen name="Diet" component={DietScreen} />
+            <Stack.Screen name="Mudah" component={MudahScreen} />
+            <Stack.Screen name="Info" component={InfoScreen} />
+            <Stack.Screen name="FavoriteMenu" component={FavoriteMenu} />
+          </>
+        )
+      ) : null}
+    </Stack.Navigator>
   );
 };
 

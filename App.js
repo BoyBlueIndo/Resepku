@@ -1,14 +1,17 @@
-import { registerRootComponent } from "expo";
-import React from "react";
-import { AuthProvider } from "./src/context/AuthContext";
-import AppNavigator from "./src/navigation/AppNavigator";
+import React from 'react';
+import { registerRootComponent } from 'expo';
+import { NavigationContainer } from '@react-navigation/native';  // Import NavigationContainer
+import { AuthProvider } from './src/context/AuthContext'; // Import AuthProvider
+import AppNavigator from './src/navigation/AppNavigator';  // Import your main AppNavigator
 
 const App = () => {
-    return (
-        <AuthProvider>
-            <AppNavigator />
-        </AuthProvider>
-    );
+  return (
+    <AuthProvider>
+      <NavigationContainer>
+        <AppNavigator />  {/* Your root navigator */}
+      </NavigationContainer>
+    </AuthProvider>
+  );
 };
 
 // Mendaftarkan komponen utama

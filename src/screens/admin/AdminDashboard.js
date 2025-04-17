@@ -82,20 +82,25 @@ const AdminDashboard = ({ navigation }) => {
       </View>
     </View>
   );
-
+  
   const handleLogout = () => {
     Alert.alert("Logout", "Yakin ingin keluar?", [
       { text: "Batal", style: "cancel" },
       {
         text: "Keluar",
         style: "destructive",
-        onPress: () => {
+        onPress: async () => {
+          // Hapus semua data terkait pengguna (jika ada)
+          await AsyncStorage.removeItem('userToken');
+          setUserInfo(null); // Reset userInfo di state
+          // Logout dan arahkan pengguna ke halaman login
           logout();
           navigation.replace("Login");
         },
       },
     ]);
   };
+  
 
   return (
     <View style={styles.container}>
