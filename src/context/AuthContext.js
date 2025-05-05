@@ -8,14 +8,14 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [userInfo, setUserInfo] = useState(null);
 
-  // Cek status login ketika aplikasi dimulai
+  // Cek status login saat app dibuka
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
-        const token = await AsyncStorage.getItem('userToken');
-        if (token) {
-          // Jika token ditemukan, simpan ke state userInfo
-          setUserInfo({ token });
+        const storedUserInfo = await AsyncStorage.getItem('userInfo');
+        console.log("Stored user info in AuthContext:", storedUserInfo); // Debug log
+        if (storedUserInfo) {
+          setUserInfo(JSON.parse(storedUserInfo));
         }
       } catch (error) {
         console.error("Error checking login status:", error);
@@ -35,24 +35,23 @@ export const AuthProvider = ({ children }) => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data); // Menampilkan data yang diterima
+        console.log(data);
 
         if (!data.user || !data.user.role) {
           Alert.alert("Error", "Role pengguna tidak ditemukan.");
           return false;
         }
 
-        const userRole = data.user.role;
         const userData = {
           token: data.token,
-          role: userRole,
+          role: data.user.role,
           _id: data.user._id,
         };
 
         setUserInfo(userData);
-        await AsyncStorage.setItem('userToken', data.token);
+        await AsyncStorage.setItem('userInfo', JSON.stringify(userData)); // Simpan lengkap
 
-        return userRole; // Return role to use in LoginScreen
+        return data.user.role; // Return role untuk digunakan di LoginScreen
       } else {
         const data = await response.json();
         Alert.alert("Login Gagal", data.msg || "Email atau password salah.");
@@ -62,13 +61,12 @@ export const AuthProvider = ({ children }) => {
       Alert.alert("Error", "Gagal menghubungi server.");
       return false;
     }
-  }
+  };
 
   const logout = async () => {
     try {
-      // Hapus token dari AsyncStorage saat logout
-      await AsyncStorage.removeItem('userToken');
-      setUserInfo(null); // Menghapus userInfo dari state
+      await AsyncStorage.removeItem('userInfo'); // Hapus semua info user
+      setUserInfo(null);
     } catch (error) {
       console.error("Error during logout:", error);
     }

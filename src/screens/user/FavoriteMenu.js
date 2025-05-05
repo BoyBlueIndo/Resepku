@@ -4,19 +4,32 @@ import { AuthContext } from "../../context/AuthContext";
 import { API_GET_FAVORITES_URL } from "../../config/config";
 
 const FavoriteMenu = ({ navigation }) => {
-  const { userInfo } = useContext(AuthContext);
-  const userId = userInfo?._id;
+  const { userInfo } = useContext(AuthContext); // Akses userInfo, bukan user
+  const userId = userInfo?._id;  // Akses _id dari userInfo
 
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      setError("User ID tidak ditemukan.");
+      setLoading(false);
+      return;
+    }
+
+    console.log("Fetching favorites for userId:", userId); // Log userId yang digunakan untuk API
     setLoading(true);
     fetch(API_GET_FAVORITES_URL(userId))
       .then((res) => res.json())
-      .then((data) => setFavorites(data))
+      .then((data) => {
+        console.log("Fetched favorites data:", data); // Log data yang diterima
+        if (Array.isArray(data)) {
+          setFavorites(data);
+        } else {
+          setError("Data favorit tidak valid.");
+        }
+      })
       .catch((err) => {
         console.error("Error fetching favorites:", err);
         setError("Gagal memuat data favorit.");
