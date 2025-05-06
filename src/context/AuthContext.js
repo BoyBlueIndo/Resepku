@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
         console.error("Error checking login status:", error);
       }
     };
-
+  
     checkLoginStatus();
   }, []);
 
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
         const userData = {
           token: data.token,
           role: data.user.role,
-          _id: data.user._id,
+          id: data.user.id,
         };
 
         setUserInfo(userData);
@@ -59,6 +59,7 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       Alert.alert("Error", "Gagal menghubungi server.");
+      console.error("Login error:", error); // Log error untuk debugging
       return false;
     }
   };
@@ -67,8 +68,10 @@ export const AuthProvider = ({ children }) => {
     try {
       await AsyncStorage.removeItem('userInfo'); // Hapus semua info user
       setUserInfo(null);
+      console.log("User logged out successfully.");
     } catch (error) {
       console.error("Error during logout:", error);
+      Alert.alert("Error", "Gagal saat logout.");
     }
   };
 

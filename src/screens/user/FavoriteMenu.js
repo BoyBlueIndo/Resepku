@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
 import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from "react-native";
 import { AuthContext } from "../../context/AuthContext";
-import { API_GET_FAVORITES_URL } from "../../config/config";
+import { API_GET_FAVORITES_URL } from "../../config/config"; // Pastikan API URL benar
 
 const FavoriteMenu = ({ navigation }) => {
-  const { userInfo } = useContext(AuthContext); // Akses userInfo, bukan user
-  const userId = userInfo?._id;  // Akses _id dari userInfo
+  const { userInfo } = useContext(AuthContext); // Akses userInfo
+  const userId = userInfo?._id; // Akses _id dari userInfo
 
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,28 +35,17 @@ const FavoriteMenu = ({ navigation }) => {
         setError("Gagal memuat data favorit.");
       })
       .finally(() => setLoading(false));
-  }, [userId]);
+  }, [userId]); // Dependensi hanya userId, jadi hanya fetch ketika userId berubah
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() =>
-        navigation.navigate("MenuDetail", {
-          menuId: item._id,
-          nama: item.nama,
-          deskripsi: item.deskripsi,
-          image: item.image,
-          videoUrl: item.videoUrl,
-        })
-      }
-    >
-      <Image source={{ uri: item.image }} style={styles.image} />
-      <View style={styles.info}>
-        <Text style={styles.name}>{item.nama}</Text>
-        {item.harga != null && <Text style={styles.price}>Rp {item.harga}</Text>}
+  // Menangani loading dan error
+  if (!userInfo) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" />
+        <Text>Loading user data...</Text>
       </View>
-    </TouchableOpacity>
-  );
+    );
+  }
 
   if (loading) {
     return (
@@ -82,6 +71,42 @@ const FavoriteMenu = ({ navigation }) => {
     );
   }
 
+  // Render setiap item favorit
+  const renderItem = ({ item }) => (
+    <View style={styles.itemContainer}>
+      <Image source={{ uri: item.imageUrl }} style={styles.image} /> {/* Ganti imageUrl dengan field yang sesuai */}
+      <View style={styles.itemContent}>
+        <Text style={styles.itemTitle}>{item.name}</Text> {/* Ganti name dengan field yang sesuai */}
+        <Text>{item.description}</Text> {/* Ganti description dengan field yang sesuai */}
+      </View>
+      <TouchableOpacity 
+        style={styles.removeButton} 
+        onPress={() => handleRemoveFavorite(item._id)}
+      >
+        <Text style={styles.removeButtonText}>Hapus Favorit</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  // Menghapus favorit
+  const handleRemoveFavorite = (menuId) => {
+    // Panggil API untuk menghapus favorit
+    console.log("Removing favorite for menuId:", menuId);
+    fetch(API_GET_FAVORITES_URL(userId), { // Ganti dengan URL API yang sesuai untuk menghapus favorit
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, menuId })
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Removed favorite:", data);
+        setFavorites(favorites.filter((item) => item._id !== menuId)); // Menghapus item dari state
+      })
+      .catch((err) => {
+        console.error("Error removing favorite:", err);
+      });
+  };
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -95,21 +120,22 @@ const FavoriteMenu = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFF" },
+  container: { flex: 1, backgroundColor: "#fff" },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  emptyText: { fontSize: 16, color: "#555" },
-  errorText: { fontSize: 16, color: "red" },
-  card: {
+  errorText: { color: "red", fontSize: 16 },
+  emptyText: { color: "gray", fontSize: 16 },
+  itemContainer: {
     flexDirection: "row",
-    marginBottom: 12,
-    backgroundColor: "#F9F9F9",
-    borderRadius: 8,
-    overflow: "hidden",
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+    alignItems: "center",
   },
-  image: { width: 80, height: 80 },
-  info: { flex: 1, padding: 8, justifyContent: "center" },
-  name: { fontSize: 16, fontWeight: "bold", marginBottom: 4 },
-  price: { fontSize: 14, color: "#888" },
+  image: { width: 50, height: 50, borderRadius: 25 },
+  itemContent: { flex: 1, marginLeft: 10 },
+  itemTitle: { fontSize: 18, fontWeight: "bold" },
+  removeButton: { backgroundColor: "#f00", padding: 8, borderRadius: 5 },
+  removeButtonText: { color: "#fff" },
 });
 
 export default FavoriteMenu;
